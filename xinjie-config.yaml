@@ -1,0 +1,55 @@
+servename: xinjie
+mqttinfo:
+  host: 49.235.106.136
+  port: 1883
+  username:
+  password:
+  publist:
+    - hello
+  sublist:
+    - hello1
+  qos: 0
+tcpmodbus:
+  enable: true
+  host: 192.168.6.6 #modbus服务器地址
+  port: 502 #modbus服务器端口
+  slaveid: 1 #从机地址
+  interval: 1 #读取频率
+  devices:
+      - register: holding   #要读取的寄存器 holding或 coil
+        topic: hello
+        registertable:
+          - startaddr: 50
+            datalen: 12
+            type: aubo-tcp
+            name: aubo-tcp
+          - startaddr: 62
+            datalen: 12
+            type: aubo-joint
+            name: aubo-joint
+rtumodbus:
+  enable: True
+  device: /dev/ttyUSB0 #0-232,1-485
+  baudrate: 19200 #波特率
+  databits: 8 #数据位
+  parity: E #校验位
+  stopbits: 1 #停止位
+  slaveid: 1 #从机地址
+  interval: 1 #读取频率
+  devices:
+      - register: holding   #要读取的寄存器 holding或 coil
+        topic: hello
+        registertable:
+          - startaddr: 500
+            datalen: 6
+            type: cgxi-tcp
+            name: cgxi-tcp
+          - startaddr: 220
+            datalen: 6
+            type: cgxi-joint
+            name: cgxi-joint
+
+
+
+
+          
