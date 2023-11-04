@@ -7,7 +7,7 @@ mqttinfo:
   publist:
     - hello
   sublist:
-    - hello1
+    - hello
   qos: 0
 tcpmodbus:
   enable: true

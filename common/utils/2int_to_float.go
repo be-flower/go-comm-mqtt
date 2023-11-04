@@ -2,13 +2,14 @@ package utils
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"strconv"
 )
 
 // TwoIntToFloat 用于aobo机械臂制定的规则，将两个int拼接为float
 func TwoIntToFloat(a, b int) float64 {
 	// 正负标志
-	flag := "+"
+	flag := ""
 	if b < 0 {
 		flag = "-"
 		b = -b
@@ -19,7 +20,7 @@ func TwoIntToFloat(a, b int) float64 {
 	// string 转 float
 	floatOutput, err := strconv.ParseFloat(str, 64)
 	if err != nil {
-		fmt.Println(err)
+		logrus.Errorf("strconv.ParseFloat error: %v", err)
 	}
 	return floatOutput
 }

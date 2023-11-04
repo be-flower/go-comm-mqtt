@@ -6,5 +6,5 @@ type JxbBo struct {
 }
 
 type CmdBo struct {
-	Enable *int `json:"enable"` //使能
+	Enable *int `json:"enable"`
 }

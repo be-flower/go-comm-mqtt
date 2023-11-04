@@ -1,7 +1,6 @@
 package modbus
 
 import (
-	"errors"
 	modbus "github.com/simonvetter/modbus"
 	"github.com/sirupsen/logrus"
 	"go-comm-mqtt/config"
@@ -30,18 +29,18 @@ func RtuModbusClient(config config.Config) (*modbus.ModbusClient, error) {
 		Timeout:  1 * time.Second,
 	})
 	if err != nil {
-		logrus.Error("rtumodbus connect error!")
-		return nil, errors.New("rtumodbus connect error")
+		logrus.Fatal("rtumodbus connect error!")
+		return nil, err
 	}
 	err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.LOW_WORD_FIRST)
 	if err != nil {
-		logrus.Error("rtumodbus SetEncoding error!")
-		return nil, errors.New("rtumodbus SetEncoding error")
+		logrus.Fatal("rtumodbus SetEncoding error!")
+		return nil, err
 	}
 	err = client.Open()
 	if err != nil {
-		logrus.Error("rtumodbus connect error!")
-		return nil, errors.New("rtumodbus connect error")
+		logrus.Fatal("rtumodbus connect error!")
+		return nil, err
 	}
 
 	logrus.Info("rtumodbus connect to " + config.Rtumodbus.Device + " successful")

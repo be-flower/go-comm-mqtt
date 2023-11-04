@@ -40,7 +40,7 @@ func init() {
 	logger := &lumberjack.Logger{
 		LocalTime:  true,
 		Filename:   "./log/go_comm_mqtt.log",
-		MaxSize:    5,  // 一个文件最大为nM
+		MaxSize:    20, // 一个文件最大为nM
 		MaxBackups: 5,  // 最多同时保存n份文件(加上正在使用的文件共n+1份)
 		MaxAge:     30, // 一个文件最多同时存在30天
 		Compress:   false,

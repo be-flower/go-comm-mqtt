@@ -1,0 +1,22 @@
+servename: digitalTwin
+mqttinfo:
+  host: 49.235.106.136
+  port: 1883
+  username:
+  password:
+  publist:
+    - /productionLine/digitalTwin/data
+  sublist:
+    - /productionLine/digitalTwin/cmd
+  qos: 0
+tcpmodbus:
+  enable: true
+  host: 192.168.6.6 #modbus服务器地址
+  port: 502 #modbus服务器端口
+  slaveid: 1 #从机地址
+  interval: 1 #读取频率
+  devices:
+      - topic: /productionLine/digitalTwin/data
+
+
+          

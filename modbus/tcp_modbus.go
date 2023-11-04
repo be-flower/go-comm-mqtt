@@ -2,7 +2,6 @@ package modbus
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	modbus "github.com/simonvetter/modbus"
@@ -24,13 +23,13 @@ func TcpModbusClient(config config.Config) (*modbus.ModbusClient, error) {
 	})
 	if err != nil {
 		// error out if client creation failed
-		logrus.Error("tcpmodbus connect error!")
-		return nil, errors.New("tcpmodbus connect error!")
+		logrus.Fatal("tcpmodbus connect error!")
+		return nil, err
 	}
 	err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.LOW_WORD_FIRST)
 	if err != nil {
-		logrus.Error("tcpmodbus SetEncoding error!")
-		return nil, errors.New("tcpmodbus SetEncoding error!")
+		logrus.Fatal("tcpmodbus SetEncoding error!")
+		return nil, err
 	}
 	// now that the client is created and configured, attempt to connect
 	err = client.Open()
@@ -40,8 +39,8 @@ func TcpModbusClient(config config.Config) (*modbus.ModbusClient, error) {
 		// the connection succeeds (i.e. err == nil), calling the constructor again
 		// is unnecessary.
 		// likewise, a client can be opened and closed as many times as needed.
-		logrus.Error("tcpmodbus connect error!")
-		return nil, errors.New("tcpmodbus connect error!")
+		logrus.Fatal("tcpmodbus connect error!")
+		return nil, err
 	}
 
 	logrus.Info("tcpmodbus connect to " + config.Tcpmodbus.Host + " successful")
