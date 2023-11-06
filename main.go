@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/sirupsen/logrus"
 	conf "go-comm-mqtt/config"
+
+	"github.com/sirupsen/logrus"
+
 	//_ "go-comm-mqtt/data/db"
 	_ "go-comm-mqtt/logger"
 	"go-comm-mqtt/modbus"
@@ -17,11 +19,11 @@ import (
 )
 
 func main() {
-	catalog, err := os.Getwd()
-	if err != nil {
-		logrus.Error("get catalog error: %v", err)
-	}
-	logrus.Infof("catalog: %v", catalog)
+	//catalog, err := os.Getwd()
+	//if err != nil {
+	//	logrus.Error("get catalog error: %v", err)
+	//}
+	//logrus.Infof("catalog: %v", catalog)
 	logrus.Info("go-comm-mqtt start")
 	config := conf.GetConfig()
 	logrus.Info("Using config: %+v\n", config)
