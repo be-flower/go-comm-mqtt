@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/spf13/viper"
@@ -10,6 +11,7 @@ import (
 type MqttInfo struct {
 	Host     string
 	Port     int
+	ClientId string
 	UserName string
 	PassWord string
 	SubList  []string

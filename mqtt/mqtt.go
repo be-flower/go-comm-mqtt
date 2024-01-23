@@ -1,23 +1,24 @@
 package mqtt
 
 import (
-	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/sirupsen/logrus"
 	"go-comm-mqtt/config"
-	"os"
 	"strconv"
 	"time"
+
+	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"github.com/sirupsen/logrus"
 )
 
 func ConnMqtt(config config.Config) (MQTT.Client, chan bool) {
-
-	hostname, _ := os.Hostname()
 
 	server := "tcp://" + config.Mqttinfo.Host + ":" + strconv.Itoa(config.Mqttinfo.Port)
 	//subtopic := config.Mqttinfo.SubList
 	//pubtopic := config.Mqttinfo.PubList
 	//qos := config.Mqttinfo.Qos
-	clientid := hostname + strconv.Itoa(time.Now().Second())
+	clientid := config.Mqttinfo.ClientId
+	if clientid == "" {
+		clientid = "go_mqtt_client"
+	}
 	username := config.Mqttinfo.UserName
 	password := config.Mqttinfo.PassWord
 
