@@ -1,13 +1,14 @@
 package modbus
 
 import (
+	"go-comm-mqtt/conf"
+	"time"
+
 	modbus "github.com/simonvetter/modbus"
 	"github.com/sirupsen/logrus"
-	"go-comm-mqtt/config"
-	"time"
 )
 
-func RtuModbusClient(config config.Config) (*modbus.ModbusClient, error) {
+func RtuModbusClient(config conf.Config) (*modbus.ModbusClient, error) {
 	logrus.Info("RTUModbus start")
 	parity := 0
 	switch config.Rtumodbus.Parity {

@@ -1,67 +1,96 @@
 package main
 
 import (
-	conf "go-comm-mqtt/config"
-
-	"github.com/sirupsen/logrus"
-
-	//_ "go-comm-mqtt/data/db"
+	"encoding/json"
+	conf "go-comm-mqtt/conf"
+	"go-comm-mqtt/data/db"
 	_ "go-comm-mqtt/logger"
-	"go-comm-mqtt/modbus"
-	"go-comm-mqtt/mqtt"
-	"go-comm-mqtt/serve/cgxi"
-	"go-comm-mqtt/serve/productionline/digitaltwin"
-	"go-comm-mqtt/serve/productionline/xinjie"
+	"go-comm-mqtt/mqtt/mqttcloud"
+	"go-comm-mqtt/mqtt/mqttedge"
+	"go-comm-mqtt/serve/productionline/web"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	//catalog, err := os.Getwd()
-	//if err != nil {
-	//	logrus.Error("get catalog error: %v", err)
-	//}
-	//logrus.Infof("catalog: %v", catalog)
 	logrus.Info("go-comm-mqtt start")
-	config := conf.GetConfig()
-	logrus.Info("Using config: %+v\n", config)
-	// mqtt
-	mqttClient, quit := mqtt.ConnMqtt(config)
-	// modbus
-	switch config.ServeName {
-	case "cgxi":
-		cgxi.CgxiDealModbus(config, mqttClient)
-	case "test":
-		modbus.DealModbus(config, mqttClient)
-	case "xinjie":
-		xinjie.XinJieDealModbus(config, mqttClient)
-	case "digitalTwin":
-		digitaltwin.DigitalTwinDealModbus(config, mqttClient)
+
+	// 初始化配置
+	conf.InitConfig()
+
+	// 上研需求，获取mqtt配置信息
+	//if conf.Conf.ServeName == "iotmqtt" {
+	//	err := Iot_mqtt.GetIotMqttConfig(conf.Conf)
+	//	if err != nil {
+	//		logrus.Error("GetIotMqttConfig error:", err)
+	//		return
+	//	}
+	//}
+
+	// 打印配置信息
+	configuration, _ := json.Marshal(conf.Conf)
+	logrus.Infof("Using conf: %v", string(configuration))
+
+	//初始化db
+	db.Init()
+
+	/** mqtt **/
+	// 初始化mqtt edge
+	mqttedge.MQTTEdgeManager = mqttedge.NewMQTTEdgeManager()
+	mqttedge.MQTTEdgeManager.Init()
+
+	// 初始化mqtt cloud
+	mqttcloud.MQTTCloudManager = mqttcloud.NewMQTTCloudManager()
+	mqttcloud.MQTTCloudManager.Init()
+
+	// serve
+	switch conf.Conf.ServeName {
+	//case "cgxi":
+	//	cgxi.CgxiDealModbus(config, mqttClient)
+	//case "test":
+	//	modbus.DealModbus(config, mqttClient)
+	//case "xinjie":
+	//	xinjie.XinJieDealModbus(config, mqttClient)
+	//case "digitalTwin":
+	//	digitaltwin.DigitalTwinDealModbus(config, mqttClient)
+	//case "iotmqtt":
+	//	Iot_mqtt.IotMqttImpl(config, mqttClient)
+	case "productionline_web":
+		web.ProductionLineWebDeal()
 	default:
-		logrus.Error("no config")
+		logrus.Error("config error, no serve name")
 	}
 
-	// safe quit
-	signalChan := make(chan os.Signal, 1)
-	cleanupDone := make(chan bool)
-	cleanup := make(chan bool)
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		for range signalChan {
-			quit <- true
-			go func() {
-				go func() {
-					mqttClient.Disconnect(250)
-				}()
-				time.Sleep(260 * time.Millisecond)
-				cleanup <- true
-			}()
-			<-cleanup
-			logrus.Info("safe quit")
-			cleanupDone <- true
+	//保持存活
+	c := initSignal()
+	handleSignal(c)
+
+}
+
+// initSignal register signals handler.
+func initSignal() chan os.Signal {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	return c
+}
+
+// handleSignal fetch signal from chan then do exit or reload.
+func handleSignal(c chan os.Signal) {
+	// Block until a signal is received.
+	for {
+		s := <-c
+		logrus.Infof("get a signal %s", s.String())
+		switch s {
+		case os.Interrupt:
+			return
+		case syscall.SIGHUP:
+			// TODO reload
+			//return
+		default:
+			return
 		}
-	}()
-	<-cleanupDone
+	}
 }

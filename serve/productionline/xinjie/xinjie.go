@@ -2,34 +2,35 @@ package xinjie
 
 import (
 	"fmt"
-	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/simonvetter/modbus"
-	"github.com/sirupsen/logrus"
-	"go-comm-mqtt/common/constants"
-	"go-comm-mqtt/common/utils"
-	"go-comm-mqtt/config"
+	"go-comm-mqtt/conf"
 	"go-comm-mqtt/domains/bos"
 	"go-comm-mqtt/domains/vos"
+	"go-comm-mqtt/libs/constants"
+	utils2 "go-comm-mqtt/libs/utils"
 	m "go-comm-mqtt/modbus"
 	"go-comm-mqtt/serve/gw"
 	"time"
+
+	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"github.com/simonvetter/modbus"
+	"github.com/sirupsen/logrus"
 )
 
 /*
 
  */
 
-func XinJieDealModbus(config config.Config, mqttClient MQTT.Client) {
-	modbusClient, err := m.TcpModbusClient(config)
+func XinJieDealModbus(config conf.Config, mqttClient MQTT.Client) {
+	modbusClient, err := m.TcpModbusClient()
 	if err != nil {
 		logrus.Error("modbusClient create error!")
 	} else {
-		//go gw.ReadGatewayModule(mqttClient, config)
+		//go gw.ReadGatewayModule(mqttClient, conf)
 		go XinJieReadTcpModbus(mqttClient, config, modbusClient)
 	}
 }
 
-func XinJieReadTcpModbus(client MQTT.Client, config config.Config, modbusclient *modbus.ModbusClient) {
+func XinJieReadTcpModbus(client MQTT.Client, config conf.Config, modbusclient *modbus.ModbusClient) {
 	logrus.Info("xinjie read tcpmodbus start")
 	xinjieJxbDataVo := vos.XinJieJxbDataVo{
 		JxbBo: bos.JxbBo{
@@ -56,7 +57,7 @@ func XinJieReadTcpModbus(client MQTT.Client, config config.Config, modbusclient 
 					switch read.Type {
 					case "aubo-tcp":
 						uint16Results, err := modbusclient.ReadRegisters(uint16(read.StartAddr), uint16(read.DataLen), modbus.HOLDING_REGISTER)
-						results := utils.Uint16sToInt16s(uint16Results)
+						results := utils2.Uint16sToInt16s(uint16Results)
 						if err != nil {
 							logrus.Errorf("××××××××××read holding register xinjie-tcp error: %v", err)
 						}
@@ -64,15 +65,15 @@ func XinJieReadTcpModbus(client MQTT.Client, config config.Config, modbusclient 
 							logrus.Error("failed to read aubo-tcp data")
 							continue
 						}
-						xinjieJxbDataVo.Data.X = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[0]), int(results[1])))
-						xinjieJxbDataVo.Data.Y = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[2]), int(results[3])))
-						xinjieJxbDataVo.Data.Z = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[4]), int(results[5])))
-						xinjieJxbDataVo.Data.Rx = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[6]), int(results[7])))
-						xinjieJxbDataVo.Data.Ry = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[8]), int(results[9])))
-						xinjieJxbDataVo.Data.Rz = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[10]), int(results[11])))
+						xinjieJxbDataVo.Data.X = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[0]), int(results[1])))
+						xinjieJxbDataVo.Data.Y = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[2]), int(results[3])))
+						xinjieJxbDataVo.Data.Z = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[4]), int(results[5])))
+						xinjieJxbDataVo.Data.Rx = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[6]), int(results[7])))
+						xinjieJxbDataVo.Data.Ry = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[8]), int(results[9])))
+						xinjieJxbDataVo.Data.Rz = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[10]), int(results[11])))
 					case "aubo-joint":
 						uint16Results, err := modbusclient.ReadRegisters(uint16(read.StartAddr), uint16(read.DataLen), modbus.HOLDING_REGISTER)
-						results := utils.Uint16sToInt16s(uint16Results)
+						results := utils2.Uint16sToInt16s(uint16Results)
 						if err != nil {
 							logrus.Errorf("××××××××××read holding register xinjie-joint error: %v", err)
 						}
@@ -80,12 +81,12 @@ func XinJieReadTcpModbus(client MQTT.Client, config config.Config, modbusclient 
 							logrus.Error("failed to read aubo-tcp data")
 							continue
 						}
-						xinjieJxbDataVo.Data.Joint1 = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[0]), int(results[1])))
-						xinjieJxbDataVo.Data.Joint2 = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[2]), int(results[3])))
-						xinjieJxbDataVo.Data.Joint3 = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[4]), int(results[5])))
-						xinjieJxbDataVo.Data.Joint4 = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[6]), int(results[7])))
-						xinjieJxbDataVo.Data.Joint5 = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[8]), int(results[9])))
-						xinjieJxbDataVo.Data.Joint6 = fmt.Sprintf("%.2f", utils.TwoIntToFloat(int(results[10]), int(results[11])))
+						xinjieJxbDataVo.Data.Joint1 = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[0]), int(results[1])))
+						xinjieJxbDataVo.Data.Joint2 = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[2]), int(results[3])))
+						xinjieJxbDataVo.Data.Joint3 = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[4]), int(results[5])))
+						xinjieJxbDataVo.Data.Joint4 = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[6]), int(results[7])))
+						xinjieJxbDataVo.Data.Joint5 = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[8]), int(results[9])))
+						xinjieJxbDataVo.Data.Joint6 = fmt.Sprintf("%.2f", utils2.TwoIntToFloat(int(results[10]), int(results[11])))
 					}
 				}
 				info, err := gw.GetGatewayModuleInfo()

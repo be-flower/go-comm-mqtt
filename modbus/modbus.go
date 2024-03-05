@@ -1,13 +1,14 @@
 package modbus
 
 import (
+	config "go-comm-mqtt/conf"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/sirupsen/logrus"
-	config "go-comm-mqtt/config"
 )
 
 func DealModbus(config config.Config, mqttClient MQTT.Client) {
-	modbusClient, err := TcpModbusClient(config)
+	modbusClient, err := TcpModbusClient()
 	if err != nil {
 		logrus.Error("modbusClient create error!")
 	} else {

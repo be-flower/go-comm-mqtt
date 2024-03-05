@@ -1,7 +1,6 @@
 package vos
 
-type DigitalTwinVo struct {
-	//Num int `json:"num"`
+type ProductionLineWebVo struct {
 	// 上料位前后初始位
 	UpInitPos bool `json:"UpInitPos"`
 	// 上料位前后取料位
@@ -33,7 +32,7 @@ type DigitalTwinVo struct {
 	// 出料位前后OK抬头位
 	OutOkLift bool `json:"OutOkLift"`
 	// 检测结果(OK/NG)
-	DateResult bool `json:"DateResult"`
+	DateResult bool `json:"DeteResult"`
 	// 启动（1表示1层启动）
 	Start int `json:"Start"`
 	// 急停（停止）（1表示急停）
@@ -70,19 +69,10 @@ type DigitalTwinVo struct {
 	Joint5 float64 `json:"joint5"`
 	// 关节角度6
 	Joint6 float64 `json:"joint6"`
-}
-
-type DigitalTwinJointVo struct {
-	// 关节角度1
-	Joint1 float64 `json:"joint1"`
-	// 关节角度2
-	Joint2 float64 `json:"joint2"`
-	// 关节角度3
-	Joint3 float64 `json:"joint3"`
-	// 关节角度4
-	Joint4 float64 `json:"joint4"`
-	// 关节角度5
-	Joint5 float64 `json:"joint5"`
-	// 关节角度6
-	Joint6 float64 `json:"joint6"`
+	// 历史NG次数
+	NGHistoryTims int `json:"NGHistoryTims"`
+	// 历史OK次数
+	OKHistoryTims int `json:"OKHistoryTims"`
+	// 运行次数
+	HistoryTims int `json:"HistoryTims"`
 }

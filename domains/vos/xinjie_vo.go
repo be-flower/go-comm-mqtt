@@ -1,6 +1,9 @@
 package vos
 
-import "go-comm-mqtt/domains/bos"
+import (
+	"encoding/json"
+	"go-comm-mqtt/domains/bos"
+)
 
 type XinJieJxbDataVo struct {
 	bos.JxbBo
@@ -28,4 +31,10 @@ type XinJieJoint struct {
 	Joint4 string `json:"joint4"`
 	Joint5 string `json:"joint5"`
 	Joint6 string `json:"joint6"`
+}
+
+type XinJieDataVo struct {
+	Serial     string          `json:"serial"`
+	DeviceType string          `json:"deviceType"`
+	Data       json.RawMessage `json:"data"`
 }

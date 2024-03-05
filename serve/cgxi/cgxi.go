@@ -2,14 +2,15 @@ package cgxi
 
 import (
 	"fmt"
-	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/simonvetter/modbus"
-	"github.com/sirupsen/logrus"
-	"go-comm-mqtt/config"
+	"go-comm-mqtt/conf"
 	"go-comm-mqtt/domains/bos"
 	"go-comm-mqtt/domains/vos"
 	m "go-comm-mqtt/modbus"
 	"time"
+
+	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"github.com/simonvetter/modbus"
+	"github.com/sirupsen/logrus"
 )
 
 /*
@@ -20,7 +21,7 @@ import (
 	cgxi读取使用大端低位
 */
 
-func CgxiDealModbus(config config.Config, mqttClient MQTT.Client) {
+func CgxiDealModbus(config conf.Config, mqttClient MQTT.Client) {
 	modbusClient, err := m.RtuModbusClient(config)
 	if err != nil {
 		logrus.Error("modbusClient create error!")
@@ -29,7 +30,7 @@ func CgxiDealModbus(config config.Config, mqttClient MQTT.Client) {
 	}
 }
 
-func CgxiReadRtuModbus(client MQTT.Client, config config.Config, modbusclient *modbus.ModbusClient) {
+func CgxiReadRtuModbus(client MQTT.Client, config conf.Config, modbusclient *modbus.ModbusClient) {
 	logrus.Info("cgxi read rtumodbus start")
 	cgxiJxbDataVo := vos.CgxiJxbDataVo{
 		JxbBo: bos.JxbBo{

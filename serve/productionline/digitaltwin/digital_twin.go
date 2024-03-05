@@ -3,31 +3,31 @@ package digitaltwin
 import (
 	"encoding/json"
 	"fmt"
+	"go-comm-mqtt/conf"
+	"go-comm-mqtt/domains/bos"
+	"go-comm-mqtt/domains/vos"
+	"go-comm-mqtt/libs/constants"
+	utils2 "go-comm-mqtt/libs/utils"
+	m "go-comm-mqtt/modbus"
+	"time"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/simonvetter/modbus"
 	"github.com/sirupsen/logrus"
-	"go-comm-mqtt/common/constants"
-	"go-comm-mqtt/common/utils"
-	"go-comm-mqtt/config"
-	"go-comm-mqtt/domains/bos"
-	"go-comm-mqtt/domains/vos"
-	m "go-comm-mqtt/modbus"
-	"time"
 )
 
-func DigitalTwinDealModbus(config config.Config, mqttClient MQTT.Client) {
-	modbusClient, err := m.TcpModbusClient(config)
+func DigitalTwinDealModbus(config conf.Config, mqttClient MQTT.Client) {
+	modbusClient, err := m.TcpModbusClient()
 	if err != nil {
 		logrus.Error("modbusClient create error!")
 	} else {
-		//CreateHistoryTable()
 		go DigitalTwinReadTcpModbus(mqttClient, config, modbusClient)
 		go DigitalTwinWriteTcpModbus(mqttClient, config, modbusClient)
-		//go DigitalTwinReadJointTcpModbus(mqttClient, config, modbusClient)
+		//go DigitalTwinReadJointTcpModbus(mqttClient, conf, modbusClient)
 	}
 }
 
-func DigitalTwinReadTcpModbus(client MQTT.Client, config config.Config, modbusclient *modbus.ModbusClient) {
+func DigitalTwinReadTcpModbus(client MQTT.Client, config conf.Config, modbusclient *modbus.ModbusClient) {
 	logrus.Info("digitalTwin read tcpmodbus start")
 	for {
 		//time.Sleep(time.Millisecond * time.Duration(100))
@@ -283,36 +283,36 @@ func digitalTwinRead(modbusclient *modbus.ModbusClient) (vos.DigitalTwinVo, erro
 	if err != nil {
 		logrus.Errorf("ReadRegisters X/Y/Z/RX/RY/RZ error: %v", err)
 	} else {
-		resultInt16s = utils.Uint16sToInt16s(resultUint16s)
+		resultInt16s = utils2.Uint16sToInt16s(resultUint16s)
 		if len(resultInt16s) != 12 {
 			logrus.Error("failed to read X/Y/Z/RX/RY/RZ data")
 		} else {
-			resultInt16s = utils.Uint16sToInt16s(resultUint16s)
-			result.X = utils.TwoIntToFloat(int(resultInt16s[0]), int(resultInt16s[1]))
-			result.Y = utils.TwoIntToFloat(int(resultInt16s[2]), int(resultInt16s[3]))
-			result.Z = utils.TwoIntToFloat(int(resultInt16s[4]), int(resultInt16s[5]))
-			result.Rx = utils.TwoIntToFloat(int(resultInt16s[6]), int(resultInt16s[7]))
-			result.Ry = utils.TwoIntToFloat(int(resultInt16s[8]), int(resultInt16s[9]))
-			result.Rz = utils.TwoIntToFloat(int(resultInt16s[10]), int(resultInt16s[11]))
+			resultInt16s = utils2.Uint16sToInt16s(resultUint16s)
+			result.X = utils2.TwoIntToFloat(int(resultInt16s[0]), int(resultInt16s[1]))
+			result.Y = utils2.TwoIntToFloat(int(resultInt16s[2]), int(resultInt16s[3]))
+			result.Z = utils2.TwoIntToFloat(int(resultInt16s[4]), int(resultInt16s[5]))
+			result.Rx = utils2.TwoIntToFloat(int(resultInt16s[6]), int(resultInt16s[7]))
+			result.Ry = utils2.TwoIntToFloat(int(resultInt16s[8]), int(resultInt16s[9]))
+			result.Rz = utils2.TwoIntToFloat(int(resultInt16s[10]), int(resultInt16s[11]))
 		}
 	}
-	// 关节角度 D62-D73
-	//resultUint16s, err = modbusclient.ReadRegisters(62, 12, modbus.HOLDING_REGISTER)
-	//if err != nil {
-	//	logrus.Errorf("ReadRegisters Joint1-6 error: %v", err)
-	//} else {
-	//	resultInt16s = utils.Uint16sToInt16s(resultUint16s)
-	//	if len(resultInt16s) != 12 {
-	//		logrus.Error("failed to read Joint1-6 data")
-	//	} else {
-	//		result.Joint1 = utils.TwoIntToFloat(int(resultInt16s[0]), int(resultInt16s[1]))
-	//		result.Joint2 = utils.TwoIntToFloat(int(resultInt16s[2]), int(resultInt16s[3]))
-	//		result.Joint3 = utils.TwoIntToFloat(int(resultInt16s[4]), int(resultInt16s[5]))
-	//		result.Joint4 = utils.TwoIntToFloat(int(resultInt16s[6]), int(resultInt16s[7]))
-	//		result.Joint5 = utils.TwoIntToFloat(int(resultInt16s[8]), int(resultInt16s[9]))
-	//		result.Joint6 = utils.TwoIntToFloat(int(resultInt16s[10]), int(resultInt16s[11]))
-	//	}
-	//}
+	//关节角度 D62-D73
+	resultUint16s, err = modbusclient.ReadRegisters(62, 12, modbus.HOLDING_REGISTER)
+	if err != nil {
+		logrus.Errorf("ReadRegisters Joint1-6 error: %v", err)
+	} else {
+		resultInt16s = utils2.Uint16sToInt16s(resultUint16s)
+		if len(resultInt16s) != 12 {
+			logrus.Error("failed to read Joint1-6 data")
+		} else {
+			result.Joint1 = utils2.TwoIntToFloat(int(resultInt16s[0]), int(resultInt16s[1]))
+			result.Joint2 = utils2.TwoIntToFloat(int(resultInt16s[2]), int(resultInt16s[3]))
+			result.Joint3 = utils2.TwoIntToFloat(int(resultInt16s[4]), int(resultInt16s[5]))
+			result.Joint4 = utils2.TwoIntToFloat(int(resultInt16s[6]), int(resultInt16s[7]))
+			result.Joint5 = utils2.TwoIntToFloat(int(resultInt16s[8]), int(resultInt16s[9]))
+			result.Joint6 = utils2.TwoIntToFloat(int(resultInt16s[10]), int(resultInt16s[11]))
+		}
+	}
 
 	return result, nil
 }
@@ -335,7 +335,7 @@ func getNGOK(result uint16) bool {
 }
 
 // 读取mqtt信息并根据配置文件写入到指定的modbus地址中
-func DigitalTwinWriteTcpModbus(client MQTT.Client, config config.Config, modbusclient *modbus.ModbusClient) {
+func DigitalTwinWriteTcpModbus(client MQTT.Client, config conf.Config, modbusclient *modbus.ModbusClient) {
 	logrus.Info("write tcpmodbus start")
 	for {
 		time.Sleep(time.Second * time.Duration(config.Tcpmodbus.Interval))
@@ -487,7 +487,7 @@ func handAutoOff(modbusclient *modbus.ModbusClient) error {
 	return nil
 }
 
-func DigitalTwinReadJointTcpModbus(client MQTT.Client, config config.Config, modbusclient *modbus.ModbusClient) {
+func DigitalTwinReadJointTcpModbus(client MQTT.Client, config conf.Config, modbusclient *modbus.ModbusClient) {
 	logrus.Info("digitalTwin read tcpmodbus start")
 	for {
 		time.Sleep(time.Millisecond * time.Duration(180))
@@ -528,23 +528,23 @@ func digitalTwinReadJoint(modbusclient *modbus.ModbusClient) (vos.DigitalTwinJoi
 	if err != nil {
 		logrus.Errorf("ReadRegisters Joint1-6 error: %v", err)
 	} else {
-		resultInt16s = utils.Uint16sToInt16s(resultUint16s)
+		resultInt16s = utils2.Uint16sToInt16s(resultUint16s)
 		if len(resultInt16s) != 12 {
 			logrus.Error("failed to read Joint1-6 data")
 		} else {
-			result.Joint1 = utils.TwoIntToFloat(int(resultInt16s[0]), int(resultInt16s[1]))
-			result.Joint2 = utils.TwoIntToFloat(int(resultInt16s[2]), int(resultInt16s[3]))
-			result.Joint3 = utils.TwoIntToFloat(int(resultInt16s[4]), int(resultInt16s[5]))
-			result.Joint4 = utils.TwoIntToFloat(int(resultInt16s[6]), int(resultInt16s[7]))
-			result.Joint5 = utils.TwoIntToFloat(int(resultInt16s[8]), int(resultInt16s[9]))
-			result.Joint6 = utils.TwoIntToFloat(int(resultInt16s[10]), int(resultInt16s[11]))
+			result.Joint1 = utils2.TwoIntToFloat(int(resultInt16s[0]), int(resultInt16s[1]))
+			result.Joint2 = utils2.TwoIntToFloat(int(resultInt16s[2]), int(resultInt16s[3]))
+			result.Joint3 = utils2.TwoIntToFloat(int(resultInt16s[4]), int(resultInt16s[5]))
+			result.Joint4 = utils2.TwoIntToFloat(int(resultInt16s[6]), int(resultInt16s[7]))
+			result.Joint5 = utils2.TwoIntToFloat(int(resultInt16s[8]), int(resultInt16s[9]))
+			result.Joint6 = utils2.TwoIntToFloat(int(resultInt16s[10]), int(resultInt16s[11]))
 		}
 	}
 
 	return result, nil
 }
 
-func DigitalTwinReadCmdTcpModbus(client MQTT.Client, config config.Config, modbusclient *modbus.ModbusClient) {
+func DigitalTwinReadCmdTcpModbus(client MQTT.Client, config conf.Config, modbusclient *modbus.ModbusClient) {
 	logrus.Info("digitalTwin read cmd start")
 	for {
 		//time.Sleep(time.Millisecond * time.Duration(100))

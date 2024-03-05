@@ -1,4 +1,5 @@
-servename: test
+servename: productionline_web
+serial:
 mqttinfo:
   host: 127.0.0.1
   port: 1883

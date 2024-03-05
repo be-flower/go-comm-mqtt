@@ -3,22 +3,35 @@ package modbus
 import (
 	"encoding/json"
 	"fmt"
+	"go-comm-mqtt/conf"
+	"go-comm-mqtt/domains/bos"
+	"go-comm-mqtt/libs/constants"
+	"os"
+	"strconv"
+	"time"
+
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	modbus "github.com/simonvetter/modbus"
 	"github.com/sirupsen/logrus"
-	"go-comm-mqtt/common/constants"
-	"go-comm-mqtt/config"
-	"go-comm-mqtt/domains/bos"
-	"strconv"
-	"time"
 )
 
-func TcpModbusClient(config config.Config) (*modbus.ModbusClient, error) {
+var ModbusClient *modbus.ModbusClient
+
+func InitModbusClient() {
+	var err error
+	ModbusClient, err = TcpModbusClient()
+	if err != nil {
+		logrus.Fatal("modbusClient create error!")
+		os.Exit(1)
+	}
+}
+
+func TcpModbusClient() (*modbus.ModbusClient, error) {
 	logrus.Info("TCPModbus start")
 	// for a TCP endpoint
 	// (see examples/tls_client.go for TLS usage and options)
 	client, err := modbus.NewClient(&modbus.ClientConfiguration{
-		URL:     "tcp://" + config.Tcpmodbus.Host + ":" + strconv.Itoa(config.Tcpmodbus.Port),
+		URL:     "tcp://" + conf.Conf.Tcpmodbus.Host + ":" + strconv.Itoa(conf.Conf.Tcpmodbus.Port),
 		Timeout: 1 * time.Second,
 	})
 	if err != nil {
@@ -43,14 +56,14 @@ func TcpModbusClient(config config.Config) (*modbus.ModbusClient, error) {
 		return nil, err
 	}
 
-	logrus.Info("tcpmodbus connect to " + config.Tcpmodbus.Host + " successful")
+	logrus.Info("tcpmodbus connect to " + conf.Conf.Tcpmodbus.Host + " successful")
 
 	return client, nil
 }
 
 /* 使用modbus slave模拟器测试 */
 
-func ReadTcpModbus(client MQTT.Client, config config.Config, modbusclient *modbus.ModbusClient) {
+func ReadTcpModbus(client MQTT.Client, config conf.Config, modbusclient *modbus.ModbusClient) {
 	logrus.Info("read tcpmodbus start")
 	for {
 		time.Sleep(time.Second * time.Duration(config.Tcpmodbus.Interval))
@@ -86,12 +99,12 @@ func ReadTcpModbus(client MQTT.Client, config config.Config, modbusclient *modbu
 }
 
 // 读取mqtt信息并根据配置文件写入到指定的modbus地址中
-func WriteTcpModbus(client MQTT.Client, config config.Config, modbusclient *modbus.ModbusClient) {
+func WriteTcpModbus(client MQTT.Client, config conf.Config, modbusclient *modbus.ModbusClient) {
 	logrus.Info("write tcpmodbus start")
 	for {
 		time.Sleep(time.Second * time.Duration(config.Tcpmodbus.Interval))
 		// 读取mqtt消息
-		for _, sub := range config.Mqttinfo.SubList {
+		for _, sub := range config.MqttCloud.SubList {
 			token := client.Subscribe(sub, 1, func(client MQTT.Client, msg MQTT.Message) {
 				logrus.Infof("Received message on topic: %s\nMessage: \n%s", msg.Topic(), msg.Payload())
 				enable := bos.CmdBo{}

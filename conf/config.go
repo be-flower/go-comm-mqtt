@@ -1,4 +1,4 @@
-package config
+package conf
 
 import (
 	"fmt"
@@ -8,7 +8,22 @@ import (
 	"github.com/spf13/viper"
 )
 
-type MqttInfo struct {
+var (
+	Conf *Config
+)
+
+type MqttCloud struct {
+	Host     string
+	Port     int
+	ClientId string
+	UserName string
+	PassWord string
+	SubList  []string
+	PubList  []string
+	Qos      int
+}
+
+type MqttEdge struct {
 	Host     string
 	Port     int
 	ClientId string
@@ -55,33 +70,62 @@ type RtuModbus struct {
 
 type Config struct {
 	ServeName string
-	Mqttinfo  MqttInfo
+	Serial    string
+	MqttCloud MqttCloud
+	MqttEdge  MqttEdge
 	Tcpmodbus TcpModbus
 	Rtumodbus RtuModbus
 }
 
-func GetConfig() Config {
+func NewConfig() *Config {
+	return &Config{
+		ServeName: "",
+		Serial:    "",
+		MqttCloud: MqttCloud{
+			Host:     "101.35.211.178",
+			Port:     1883,
+			ClientId: "",
+			UserName: "",
+			PassWord: "",
+			SubList:  nil,
+			PubList:  nil,
+			Qos:      0,
+		},
+		MqttEdge: MqttEdge{
+			Host:     "127.0.0.1",
+			Port:     1883,
+			ClientId: "",
+			UserName: "",
+			PassWord: "",
+			SubList:  nil,
+			PubList:  nil,
+			Qos:      0,
+		},
+		Tcpmodbus: TcpModbus{
+			Enable:   false,
+			Host:     "192.168.6.6",
+			Port:     502,
+			SlaveID:  1,
+			Interval: 3,
+			Devices:  nil,
+		},
+		Rtumodbus: RtuModbus{
+			Enable:   false,
+			Device:   "",
+			BaudRate: 9600,
+			DataBits: 8,
+			Parity:   "N",
+			StopBits: 1,
+			SlaveID:  1,
+			Interval: 3,
+			Devices:  nil,
+		},
+	}
+}
 
-	config := Config{}
-	config.Mqttinfo.Host = "127.0.0.1"
-	config.Mqttinfo.Port = 1883
-	config.Mqttinfo.Qos = 0
+func InitConfig() {
 
-	//modbusTCP配置
-	config.Tcpmodbus.Enable = false
-	config.Tcpmodbus.Host = "127.0.0.1"
-	config.Tcpmodbus.Port = 502
-	config.Tcpmodbus.SlaveID = 1
-	config.Tcpmodbus.Interval = 3
-
-	//modbusRTU配置
-	config.Rtumodbus.Enable = false
-	config.Rtumodbus.BaudRate = 9600
-	config.Rtumodbus.DataBits = 8
-	config.Rtumodbus.Parity = "N"
-	config.Rtumodbus.StopBits = 1
-	config.Rtumodbus.SlaveID = 1
-	config.Rtumodbus.Interval = 3
+	Conf = NewConfig()
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -92,13 +136,11 @@ func GetConfig() Config {
 		} else {
 			fmt.Println(err.Error())
 		}
-		return config
 	}
 
-	err := viper.Unmarshal(&config)
+	err := viper.Unmarshal(Conf)
 	if err != nil {
 		logrus.Fatalf("unable to decode into struct, %v", err)
 	}
 
-	return config
 }

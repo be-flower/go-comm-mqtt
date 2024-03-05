@@ -1,4 +1,4 @@
-package modol
+package model
 
 type DigitalTwinHistoryTimes struct {
 	// 主键ID

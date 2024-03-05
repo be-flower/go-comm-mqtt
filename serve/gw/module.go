@@ -2,9 +2,7 @@ package gw
 
 import (
 	"fmt"
-	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/sirupsen/logrus"
-	"go-comm-mqtt/config"
+	"go-comm-mqtt/conf"
 	"go-comm-mqtt/domains/bos"
 	"go-comm-mqtt/domains/vos"
 	"io/ioutil"
@@ -12,9 +10,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"github.com/sirupsen/logrus"
 )
 
-func ReadGatewayModule(client MQTT.Client, config config.Config) {
+func ReadGatewayModule(client MQTT.Client, config conf.Config) {
 	for {
 		var sendmodulemsg string
 		time.Sleep(time.Second * time.Duration(config.Tcpmodbus.Interval))
